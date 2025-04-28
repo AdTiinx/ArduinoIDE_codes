@@ -1,0 +1,103 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+#include <Servo.h>
+
+// Vytvoreni Wi-Fi AP (access point)
+const char* ssid = "ESP-Servo";
+const char* password = "heslo123";
+
+// Inicializace web serveru
+ESP8266WebServer server(80);
+
+// Inicializace serv
+Servo servoZapni;
+Servo servoVypni;
+
+// Servo piny
+const int pinZapni = D5;  // GPIO14
+const int pinVypni = D6;  // GPIO12
+
+void handleRoot() {
+  server.send(200, "text/html", R"rawliteral(
+    <html>
+      <head>
+        <style>
+          body {
+            text-align: center;
+            background-color: #f2f2f2;
+          }
+          .button {
+            display: inline-block;
+            margin: 40px;
+            padding: 24px 64px;
+            font-size: 36px;
+            border: none;
+            border-radius: 16px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+          }
+          .button:hover {
+            transform: scale(1.1);
+            background-color: #45a049;
+          }
+          .button:active {
+            transform: scale(0.98);
+          }
+        </style>
+      </head>
+      <body>
+        <a href="/zapni"><button class="button">Zapni</button></a>
+        <a href="/vypni"><button class="button">Vypni</button></a>
+      </body>
+    </html>
+  )rawliteral");
+}
+
+void handleZapni() {
+  servoZapni.attach(pinZapni);   // Připojí servo znovu
+  servoZapni.write(180);
+  delay(150);
+  servoZapni.write(90);
+  delay(100);
+  servoZapni.detach();           // Odpojí servo, aby nebylo stále napájené
+  server.sendHeader("Location", "/");
+  server.send(303);
+}
+
+void handleVypni() {
+  servoVypni.attach(pinVypni);
+  servoVypni.write(0);
+  delay(150);
+  servoVypni.write(90);
+  delay(100);
+  servoVypni.detach();
+  server.sendHeader("Location", "/");
+  server.send(303);
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Pripojeni serv
+  servoZapni.attach(pinZapni);
+  servoVypni.attach(pinVypni);
+  servoZapni.write(90);    // Výchozí pozice
+  servoVypni.write(90);
+
+  // Start AP
+  WiFi.softAP(ssid, password);
+  Serial.println("AP spusteno. Pripoj se k Wi-Fi: ESP-Servo");
+
+  // Webove routy
+  server.on("/", handleRoot);
+  server.on("/zapni", handleZapni);
+  server.on("/vypni", handleVypni);
+  server.begin();
+  Serial.println("Server bezi");
+}
+
+void loop() {
+  server.handleClient();
+}
