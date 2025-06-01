@@ -5,14 +5,14 @@
 #include <time.h>
 
 // WiFi připojení
-const char* ssid = "ARRIS-D1DD";
-const char* password = "C863FCB2D1DD";
+const char* ssid = "YOUR WIFI";
+const char* password = "password";
 
 // OpenWeatherMap API
 const char* host = "api.openweathermap.org";
-const char* city = "Hrusovany%20u%20Brna";
+const char* city = "your location";
 const char* country = "cz";
-const char* apiKey = "c530b96c1db60ba56bbd162cfe824201";
+const char* apiKey = "your apiKey";
 
 // LCD displej
 LiquidCrystal_I2C lcd(0x27, 16, 4);
